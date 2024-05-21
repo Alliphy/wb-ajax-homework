@@ -57,25 +57,46 @@ async function orderCookies(evt) {
   // TODO: show the result message after your form
   const orderForm = document.getElementById("order-form");
   
-  const cookieFlavor = document.getElementById("cookie-type-field").value;
+  const cookieType = document.getElementById("cookie-type-field").value;
   
-  const cookieQuantity = document.getElementById(#qty-field).value;
+  const qty = document.getElementById("qty-field").value;
   
   const response = await axios.post(
     "/order-cookies.json",
-    { cookieFlavor: cookieFlavor, cookieQuantity: cookieQuantity }
-  )
+    { cookieType: cookieType, qty: qty }
+  );
   // TODO: if the result code is ERROR, make it show up in red (see our CSS!)
+
+  const orderStatusDiv = document.getElementById("order-status");
+  orderStatusDiv.innerText = response.data.message;
+
+  if(response.data.resultCode === "ERROR") {
+    orderStatusDiv.classList.add("order-error");
+  } else {
+    orderStatusDiv.classList.remove("order-error");
+  }
 }
 document.querySelector('#order-form').addEventListener('submit', orderCookies);
 
 // PART 4: iTunes Search
 
-function iTunesSearch(evt) {
+async function iTunesSearch(evt) {
   evt.preventDefault();
   const searchTerm = document.querySelector("#search-term").value;
 
   // TODO: In the #itunes-results list, show all results in the following format:
+  const formData = {'term': searchTerm};
+  const queryString = new URLSearchParams(formData).toString();
+  const url = `https://itunes.apple.com/search?${queryString}`;
+
   // `Artist: ${artistName} Song: ${trackName}`
+
+  const response = await axios.get(url);
+  let displayString = "";
+  for (const result of response.data.results) {
+    displayString += `<li>Artist: ${result.artistName} Song: ${result.trackName}</li>`
+  }
+  document.querySelector("#itunes-results").innerHTML = displayString;
 }
+
 document.querySelector('#itunes-search-form').addEventListener('submit', iTunesSearch);
